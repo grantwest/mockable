@@ -11,7 +11,7 @@ Zero boilerplate mock delegation.
 
 ## Example
 
-use Mockable in your module:
+use Mockable in a module:
 
 ```elixir
 defmodule TemperatureClient do
@@ -26,7 +26,7 @@ defmodule TemperatureClient do
 end
 ```
 
-Configure your test environment (config/test.exs) to delegate function calls to your mock:
+Configure the test environment (config/test.exs) to delegate function calls to the mock:
 
 ```elixir
 config :mockable, [
@@ -34,7 +34,7 @@ config :mockable, [
 ]
 ```
 
-Optionally configure your dev (config/dev.exs) environment to delegate function calls to a stub:
+Optionally configure the dev (config/dev.exs) environment to delegate function calls to a stub:
 
 ```elixir
 config :mockable, [
@@ -43,11 +43,11 @@ config :mockable, [
 ]
 ```
 
-The log option shown above controls the debug level log output that indicates the implementation used for each invocation. This is compiled out in prod builds.
+The `log` option shown above controls whether a log is emmitted for each invocation indicating the implementation used. This is compiled out in prod builds.
 
-You should NOT `config :mockable ...` in your prod builds. Not being configured is what sets it to compile out.
+DO NOT `config :mockable, ...` in prod builds. Not being configured is what sets it to compile out.
 
-Implement your dev stub like this:
+Implement a dev stub like this:
 
 ```elixir
 defmodule TemperatureClientStub do
