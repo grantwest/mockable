@@ -2,7 +2,7 @@ defmodule Mockable.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @description "Mox compatible mocking without boilerplate"
+  @description "Implementation delegation without boilerplate"
   @source_url "https://github.com/grantwest/mockable"
 
   def project do
