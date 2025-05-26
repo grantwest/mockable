@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-0BSD-blue.svg)](https://opensource.org/licenses/0bsd)
 [![Last Updated](https://img.shields.io/github/last-commit/grantwest/mockable.svg)](https://github.com/grantwest/mockable/commits/main)
 
-Mox/Hammox compatible mocking with minimal configuration and no boilerplate or ceremony.
+Mox/Hammox compatible mocking with minimal configuration and zero boilerplate.
 
 Features/Benefits:
 
@@ -47,7 +47,7 @@ config :mockable, [
 Optionally configure your dev environment to route function calls to a stub:
 
 ```elixir
-config :mockable [
+config :mockable, [
   {TemperatureClient, TemperatureClientStub},
   log: false
 ]

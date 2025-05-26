@@ -27,7 +27,7 @@ end
 defmodule ClientAlt do
   @behaviour Client
 
-  @impl Client
+  @impl true
   def mockable_function(request) do
     "#{request} alt"
   end
