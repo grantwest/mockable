@@ -43,9 +43,9 @@ config :mockable, [
 ]
 ```
 
-The `log` option shown above controls whether a log is emmitted for each invocation indicating the implementation used. This is compiled out in prod builds.
+The `log` option shown above controls whether a log is emmitted for each invocation indicating the implementation used. If you are using mockable in prod builds for stubs/fakes in staging environments, you probably want to set `log: false` for your prod build.
 
-DO NOT `config :mockable, ...` in prod builds. Not being configured is what sets it to compile out.
+If you don't configure a default implementation for a Mockable module at compile time, all Mockable code for that module will be completely eliminated from the build. It will be as if that module does not `use Mockable`.
 
 Implement a dev stub like this:
 

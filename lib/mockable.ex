@@ -38,7 +38,7 @@ defmodule Mockable do
     module = env.module
     module_string = module |> Atom.to_string() |> String.replace_prefix("Elixir.", "")
 
-    if Application.get_all_env(:mockable) != [] do
+    if Application.get_env(:mockable, module) do
       callback_specs =
         Module.get_attribute(module, :callback)
         |> Enum.map(fn {:callback, spec, _} ->
