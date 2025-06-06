@@ -1,4 +1,6 @@
 defmodule Mockable do
+  require Logger
+
   @moduledoc """
   Documentation for `Mockable`.
   """
@@ -37,42 +39,46 @@ defmodule Mockable do
     module_string = module |> Atom.to_string() |> String.replace_prefix("Elixir.", "")
 
     if Application.get_all_env(:mockable) != [] do
-      callbacks =
+      callback_specs =
         Module.get_attribute(module, :callback)
-        |> Enum.map(fn {:callback, {:"::", _, [{name, _, args} | _]}, _} ->
-          {name, length(args)}
+        |> Enum.map(fn {:callback, spec, _} ->
+          case spec do
+            {:"::", _, [{name, _, args}, _return_type]} ->
+              {{name, length(args)}, spec}
+          end
         end)
-
-      functions =
-        Module.definitions_in(module, :def)
-        |> Enum.filter(&(&1 in callbacks))
+        |> Map.new()
+        |> Map.take(Module.definitions_in(module, :def))
 
       wrapped_functions =
-        for {name, arity} <- functions do
+        for {{name, arity}, spec} <- callback_specs do
           args = Macro.generate_arguments(arity, __MODULE__)
 
           quote do
             defoverridable [{unquote(name), unquote(arity)}]
 
+            @spec unquote(spec)
             def unquote(name)(unquote_splicing(args)) do
               implementation =
                 Process.get({Mockable, unquote(module)}) ||
                   Application.get_env(:mockable, unquote(module))
 
-              log? = Application.get_env(:mockable, :log, true)
-
               if implementation != unquote(module) do
-                log? &&
-                  Logger.debug(
-                    "Using #{inspect(implementation)}.#{unquote(name)}/#{unquote(arity)} for #{unquote(module_string)}"
-                  )
+                Mockable.log_implementation_usage(
+                  implementation,
+                  unquote(name),
+                  unquote(arity),
+                  unquote(module_string)
+                )
 
                 apply(implementation, unquote(name), [unquote_splicing(args)])
               else
-                log? &&
-                  Logger.debug(
-                    "Using #{inspect(unquote(module))}.#{unquote(name)}/#{unquote(arity)} for #{unquote(module_string)}"
-                  )
+                Mockable.log_implementation_usage(
+                  implementation,
+                  unquote(name),
+                  unquote(arity),
+                  unquote(module_string)
+                )
 
                 super(unquote_splicing(args))
               end
@@ -85,5 +91,13 @@ defmodule Mockable do
         (unquote_splicing(wrapped_functions))
       end
     end
+  end
+
+  if Application.compile_env(:mockable, :log, true) do
+    def log_implementation_usage(implementation, function_name, arity, module) do
+      Logger.debug("Using #{inspect(implementation)}.#{function_name}/#{arity} for #{module}")
+    end
+  else
+    def log_implementation_usage(_implementation, _function_name, _arity, _module), do: :ok
   end
 end

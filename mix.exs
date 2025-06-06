@@ -1,7 +1,7 @@
 defmodule Mockable.MixProject do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
   @description "Implementation delegation without boilerplate"
   @source_url "https://github.com/grantwest/mockable"
 
@@ -26,7 +26,9 @@ defmodule Mockable.MixProject do
   end
 
   def application do
-    []
+    [
+      extra_applications: [:logger]
+    ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
@@ -36,6 +38,7 @@ defmodule Mockable.MixProject do
   defp deps do
     [
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:mox, "~> 1.2", only: :test, runtime: false}
     ]
@@ -49,7 +52,10 @@ defmodule Mockable.MixProject do
     %{
       licenses: ["0BSD"],
       maintainers: ["Grant West"],
-      links: %{"GitHub" => @source_url}
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => "https://hexdocs.pm/mockable/changelog.html"
+      }
     }
   end
 
@@ -57,7 +63,7 @@ defmodule Mockable.MixProject do
     [
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md"],
+      extras: ["README.md", "CHANGELOG.md"],
       main: "readme"
     ]
   end

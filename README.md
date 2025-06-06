@@ -34,7 +34,7 @@ config :mockable, [
 ]
 ```
 
-Optionally configure the dev (config/dev.exs) environment to delegate function calls to a stub:
+Optionally configure the dev environment (config/dev.exs) to delegate function calls to a stub:
 
 ```elixir
 config :mockable, [
@@ -71,6 +71,7 @@ Features/Benefits:
 - Zero boilerplate code
 - Can be used with Exunit `async: true`
 - Compatible with Mox/Hammox (and probably any other mocking library)
+- Applies @callback as @spec on implementations to enable dialyzer checks
 - Configurable with Application environment & process memory
 - Completely compiles out in prod builds, not requiring even an `Application.get_env`, making it suitable for frequently called functions
 - Behaviour and implementation defined in the same module for easy finding/reading
