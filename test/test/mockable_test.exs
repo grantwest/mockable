@@ -67,7 +67,7 @@ defmodule MockableTest do
     return_fail_line = function_lines.dialyzer_return_fail + 1
 
     assert [
-             {:warn_failing_call, {~c"test/support/client.ex", {_line, _col}},
+             {:warn_failing_call, {~c"test/support/client.ex", _location},
               {:call,
                [
                  Client,
@@ -82,7 +82,7 @@ defmodule MockableTest do
            ] = warning_for_line(client_warnings, argument_fail_line)
 
     assert [
-             {:warn_failing_call, {~c"test/support/client.ex", {_line, _col}},
+             {:warn_failing_call, {~c"test/support/client.ex", _location},
               {:call,
                [
                  :erlang,
