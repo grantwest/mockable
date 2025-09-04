@@ -1,0 +1,137 @@
+---
+alwaysApply: true
+---
+
+# Cursor Rules for Mockable
+
+## Project Overview
+
+This is an Elixir library called "Mockable" that provides zero-boilerplate mock delegation for testing. It allows developers to create mockable modules with compile-time configuration that completely eliminates mockable code from production builds. The idea is to make a module with mockable functions with minimal distraction from the production implementation. And to be able to swap implementations in test/dev/staging with minimal ceremony.
+
+## Important Instructions
+
+- Do not change the tests unless specifically told to
+- Preserve the ability for Mockable to be completely eliminated from the compiled code
+
+## Tech Stack
+
+- **Language**: Elixir 1.13+
+- **Build Tool**: Mix
+- **Testing**: ExUnit with Mox for mocking
+- **Documentation**: ExDoc
+- **Type Checking**: Dialyxir
+- **CI/CD**: GitHub Actions
+
+## Project Structure
+
+```
+mockable/
+├── lib/mockable.ex          # Core library module with macros
+├── mix.exs                  # Project configuration
+├── config/                  # Environment configurations
+│   ├── config.exs          # Base config
+│   ├── dev.exs             # Development config
+│   ├── test.exs            # Test config with mock setup
+│   └── prod_test.exs       # Production test config
+└── test/
+    ├── test/               # Standard tests
+    ├── prod_test/          # Production behavior tests
+    └── support/            # Test helpers and fixtures
+```
+
+## Coding Standards
+
+### Elixir Style
+
+- Use 2-space indentation
+- Follow standard Elixir naming conventions (snake_case for functions/variables, PascalCase for modules)
+- Use explicit `@impl true` for behavior implementations
+- Place `@callback` specifications before their implementations
+- Use pattern matching and guards effectively
+- Prefer explicit return values over implicit ones
+
+### Module Organization
+
+- Define callbacks at the top of the module after `use Mockable`
+- Implement callback functions with `@impl true`
+- Group related functions together
+- Place private functions at the bottom
+- Use module attributes for constants and configuration
+
+### Documentation
+
+- Use `@moduledoc` for module-level documentation
+- Use `@doc` for public function documentation
+- Include examples in docstrings using ExDoc format
+- Use `@spec` for type specifications (automatically applied by Mockable for callbacks)
+
+### Test Structure
+
+- Group related tests using `describe` blocks
+- Use descriptive test names that explain the behavior
+- Test both success and error cases
+- Include tests for edge cases and guard conditions
+- Test macro-generated code (delegation, original implementations)
+- Running the unit tests is sufficient proof of correctness, do not run iex commands or create test scripts.
+
+### Mock Testing
+
+```elixir
+test "description" do
+  expect(Module.Mock, :function_name, fn arg -> result end)
+  assert Module.function_name(arg) == result
+end
+```
+
+### Runtime Configuration Testing
+
+```elixir
+test "runtime override" do
+  Mockable.use(Module, AlternativeImplementation)
+  assert Module.function_name(arg) == expected_result
+end
+```
+
+### Dialyzer Integration
+
+- Include `@tag :dialyzer` for type-checking tests
+- Test that callbacks properly apply `@spec` annotations
+- Verify type violations are caught by Dialyzer
+
+## Build and Development
+
+### Common Commands
+
+- `mix test && MIX_ENV=prod_test mix test` - Run all tests
+- `mix format` - Code formatting
+- `mix test <test file path>` to run a specific test file
+- `mix test <test file path>:<line number>` to run a specific test
+
+## Key Implementation Details
+
+## Performance Considerations
+
+- Zero overhead in production when not configured
+- Compile-time elimination of mockable code
+- Process memory for test isolation
+- Efficient delegation without runtime checks in prod
+
+## Dependencies Management
+
+- Keep dependencies minimal and test-only when possible
+- Use `only: [:dev, :test]` for development dependencies
+- Pin versions for stability
+- Regularly update dependencies for security
+
+## Error Handling
+
+- Preserve original stacktraces in delegated calls
+- Ensure error messages are clear and helpful
+- Test error conditions and edge cases
+- Handle compilation errors gracefully
+
+## Security
+
+- No runtime dependencies in production
+- Process isolation for test configurations
+- Clear separation of test and production code paths

@@ -14,4 +14,23 @@ defmodule MockableProdTest do
     assert result == "a prod"
     assert log == ""
   end
+
+  test "stacktrace is normal" do
+    try do
+      Client.raises()
+    rescue
+      e in RuntimeError ->
+        assert e.message == "prod raises"
+
+        assert [
+                 {Client, :raises, 0,
+                  [
+                    file: ~c"test/support/client.ex",
+                    line: 60,
+                    error_info: %{module: Exception}
+                  ]}
+                 | _rest
+               ] = __STACKTRACE__
+    end
+  end
 end

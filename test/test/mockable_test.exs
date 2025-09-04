@@ -44,7 +44,110 @@ defmodule MockableTest do
   test "does not override functions that have different arity than callbacks" do
     Mockable.use(Client, ClientAlt)
     assert Client.arity_specific() == "alt"
-    assert Client.arity_specific(1) == "prod"
+    assert Client.arity_specific(1) == "prod 1"
+  end
+
+  test "delegates functions with guards" do
+    expect(Client.Mock, :guarded_function, fn :hi -> "mox atom" end)
+    expect(Client.Mock, :guarded_function, fn 5 -> "mox integer" end)
+    assert Client.guarded_function(:hi) == "mox atom"
+    assert Client.guarded_function(5) == "mox integer"
+
+    Mockable.use(Client)
+    assert Client.guarded_function(:hi) == "prod atom = hi"
+    assert Client.guarded_function(5) == "prod integer = 5"
+
+    Mockable.use(Client, ClientAlt)
+    assert Client.guarded_function(:hi) == "alt atom = hi"
+    assert Client.guarded_function(5) == "alt integer = 5"
+
+    assert Client.Impl.guarded_function(:hi) == "prod atom = hi"
+    assert Client.Impl.guarded_function(5) == "prod integer = 5"
+  end
+
+  test "delegates functions with pattern matching" do
+    expect(Client.Mock, :pattern_matched_function, fn %{key: 1} -> "mox map" end)
+    expect(Client.Mock, :pattern_matched_function, fn [1] -> "mox list" end)
+    assert Client.pattern_matched_function(%{key: 1}) == "mox map"
+    assert Client.pattern_matched_function([1]) == "mox list"
+
+    Mockable.use(Client)
+    assert Client.pattern_matched_function(%{key: 1}) == "prod map with key = 1"
+    assert Client.pattern_matched_function([1]) == "prod list with head = 1"
+
+    Mockable.use(Client, ClientAlt)
+    assert Client.pattern_matched_function(%{key: 1}) == "alt map with key = 1"
+    assert Client.pattern_matched_function([1]) == "alt list with head = 1"
+
+    assert Client.Impl.pattern_matched_function(%{key: 1}) == "prod map with key = 1"
+    assert Client.Impl.pattern_matched_function([1]) == "prod list with head = 1"
+  end
+
+  test "can stub Mox with __MODULE__Impl" do
+    # this is useful in test to test the prod implementation in an async: true compatible way
+    # we avoid implementing any ownership logic by relaying on Mox's ownership logic
+    # Mockable.use(Client, Client.Mock) is configured by default so we don't need to run it here
+    stub_with(Client.Mock, Client.Impl)
+    assert Client.mockable_function("a") == "a prod"
+    assert Client.arity_specific() == "prod"
+    assert Client.arity_specific(1) == "prod 1"
+    assert Client.not_a_callback() == "prod"
+    assert Client.guarded_function(:hi) == "prod atom = hi"
+    assert Client.guarded_function(1) == "prod integer = 1"
+    assert Client.pattern_matched_function(%{key: 1}) == "prod map with key = 1"
+    assert Client.pattern_matched_function([1]) == "prod list with head = 1"
+    assert Client.spec_tester("test") == "test"
+  end
+
+  test "stacktrace file and line numbers match original implementation - prod" do
+    Mockable.use(Client)
+
+    try do
+      Client.raises()
+    rescue
+      e in RuntimeError ->
+        assert e.message == "prod raises"
+
+        assert [
+                 {Client, :"raises (overridable 1)", 0,
+                  [
+                    file: ~c"test/support/client.ex",
+                    line: 60,
+                    error_info: %{module: Exception}
+                  ]}
+                 | _rest
+               ] = __STACKTRACE__
+    end
+  end
+
+  test "stacktrace file and line numbers match original implementation - alt" do
+    Mockable.use(Client, ClientAlt)
+
+    try do
+      Client.raises()
+    rescue
+      e in RuntimeError ->
+        assert e.message == "alt raises"
+
+        assert [
+                 {ClientAlt, :raises, 0,
+                  [
+                    file: ~c"test/support/client.ex",
+                    line: _line_number,
+                    error_info: %{module: Exception}
+                  ]}
+                 | _rest
+               ] = __STACKTRACE__
+    end
+  end
+
+  test "with" do
+    with 1 <- 1,
+         Base.decode16!("AA"),
+         2 = 2 do
+      IO.puts("a")
+      assert true
+    end
   end
 
   @tag :dialyzer
