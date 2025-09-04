@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-0BSD-blue.svg)](https://opensource.org/licenses/0bsd)
 [![Last Updated](https://img.shields.io/github/last-commit/grantwest/mockable.svg)](https://github.com/grantwest/mockable/commits/main)
 
-Zero boilerplate mock delegation.
+Zero boilerplate implementation delegation.
 
 ## Example
 
@@ -97,13 +97,16 @@ Why do we need this? TemperatureClient is always going to run the delegation log
 
 Mockable works by using a `__before_compile__` macro to wrap each callback implementation in delegation logic. But it only does this if `:mockable` is configured for the module, thus it does not affect production code.
 
+Mockable is not a mock framework. It works with the mock framework of your choice. It helps delegate function calls to mocks. If you are coming from OOP, Mockable serves a similar purpose to dependency injection in tests.
+
 Features/Benefits:
 
 - Zero boilerplate code
 - Can be used with Exunit `async: true`
 - Compatible with Mox/Hammox (and probably any other mocking library)
 - Applies @callback as @spec on implementations to enable dialyzer checks
-- Configurable with Application environment & process memory
 - Completely compiles out in prod builds, not requiring even an `Application.get_env`, making it suitable for frequently called functions
 - Behaviour and implementation defined in the same module for easy finding/reading
 - Only overrides callbacks, other functions defined within the Mockable module are not delegated and can be called as normal
+- IDE "navigate to definition" features work as expected
+- Flexible options for configuring delegation
