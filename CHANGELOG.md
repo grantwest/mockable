@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.2.2 (2025-09-02)
+
+- Introduce **MODULE**.Impl as a simple reference to the production implementation
+- Significantly improved test suite
+
 ## v0.2.1 (2025-06-06)
 
 - Compile out mockable for individual Mockable modules instead of globally, to support stubs/fakes in prod builds for staging environments

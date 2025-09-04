@@ -27,6 +27,24 @@ defmodule Mockable do
     Process.put({Mockable, mockable}, implementation)
   end
 
+  @doc """
+  Configures an implementation to be used only for the duration of the given function.
+  This is used internally and is not expected to be useful for end users, but is documented for completeness.
+  """
+  def use(mockable, implementation, func) do
+    before = Process.get({Mockable, mockable}, :not_set)
+    Process.put({Mockable, mockable}, implementation)
+
+    try do
+      func.()
+    after
+      case before do
+        :not_set -> Process.delete({Mockable, mockable})
+        _ -> Process.put({Mockable, mockable}, before)
+      end
+    end
+  end
+
   defmacro __using__(_opts) do
     quote do
       @before_compile unquote(__MODULE__)
@@ -86,9 +104,27 @@ defmodule Mockable do
           end
         end
 
+      impl_functions =
+        for {{name, arity}, _spec} <- callback_specs do
+          args = Macro.generate_arguments(arity, __MODULE__)
+
+          quote do
+            def unquote(name)(unquote_splicing(args)) do
+              Mockable.use(unquote(module), unquote(module), fn ->
+                apply(unquote(module), unquote(name), [unquote_splicing(args)])
+              end)
+            end
+          end
+        end
+
       quote do
         require Logger
         (unquote_splicing(wrapped_functions))
+
+        defmodule Impl do
+          @behaviour unquote(module)
+          (unquote_splicing(impl_functions))
+        end
       end
     end
   end
