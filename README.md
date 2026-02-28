@@ -7,6 +7,8 @@
 [![License](https://img.shields.io/badge/License-0BSD-blue.svg)](https://opensource.org/licenses/0bsd)
 [![Last Updated](https://img.shields.io/github/last-commit/grantwest/mockable.svg)](https://github.com/grantwest/mockable/commits/main)
 
+**Important:** This package is in maintence mode. I suggest using [Mimic](https://hex.pm/packages/mimic) or [Req.Test](https://hexdocs.pm/req/Req.Test.html) for your mocking, they are much better.
+
 Zero boilerplate implementation delegation.
 
 ## Example
